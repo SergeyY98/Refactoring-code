@@ -7,14 +7,14 @@ ACCESS_TOKEN = '17da724517da724517da72458517b8abce117da17da' \
 API_URL = 'https://api.vk.com/method'
 V = '5.71'
 
-
+#действие
 def get_user_id(uid):
     users_get = '{}/users.get'.format(API_URL)
     resp = requests.get(users_get, params={
         'access_token': ACCESS_TOKEN,
         'user_ids': uid,
         'v': V
-    })
+    })#неявный вход
     try:
         resp = resp.json()
         resp = resp['response']
@@ -23,7 +23,7 @@ def get_user_id(uid):
     except (JSONDecodeError, IndexError, KeyError):
         pass
 
-
+#действие
 def get_friends(user_id):
     friends_get = '{}/friends.get'.format(API_URL)
     resp = requests.get(friends_get, params={
@@ -31,7 +31,7 @@ def get_friends(user_id):
         'user_id': user_id,
         'fields': 'bdate',
         'v': V
-    })
+    })#неявный вход
     try:
         resp = resp.json()
         resp = resp['response']
@@ -39,13 +39,13 @@ def get_friends(user_id):
     except (JSONDecodeError, KeyError):
         pass
 
-
+#действие
 def calc_age(uid):
-    user_id = get_user_id(uid)
+    user_id = get_user_id(uid)#действие
     if user_id is None:
         return
 
-    friends = get_friends(user_id)
+    friends = get_friends(user_id)#действие
     if friends is None:
         return
 
@@ -53,16 +53,16 @@ def calc_age(uid):
     cur_year = datetime.now().year
 
     for friend in friends:
-        bdate = friend.get('bdate')
+        bdate = friend.get('bdate') #вычисление
         if not bdate:
             continue
 
-        bdate = bdate.split('.')
+        bdate = bdate.split('.') #вычисление
         if len(bdate) != 3:
             continue
 
-        year = int(bdate[2])
-        diff = cur_year - year
+        year = int(bdate[2]) #вычисление
+        diff = cur_year - year #вычисление
         years.setdefault(diff, 0)
         years[diff] += 1
 
