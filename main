@@ -1,3 +1,4 @@
+# This Python file uses the following encoding: utf-8
 from json.decoder import JSONDecodeError
 from datetime import datetime
 import requests
@@ -7,20 +8,23 @@ ACCESS_TOKEN = '17da724517da724517da72458517b8abce117da17da' \
 API_URL = 'https://api.vk.com/method'
 V = '5.71'
 
-#Вычисление
+
+# Вычисление
 def get_user(resp):
     resp = resp.json()
     resp = resp['response']
     user = resp[0]
     return user['id']
 
-#Вычисление
+
+# Вычисление
 def get_friends_items(resp):
     resp = resp.json()
     resp = resp['response']
     return resp['items']
 
-#действие
+
+# действие
 def get_user_id(uid):
     users_get = '{}/users.get'.format(API_URL)
     resp = requests.get(users_get, params={
@@ -33,7 +37,8 @@ def get_user_id(uid):
     except (JSONDecodeError, IndexError, KeyError):
         pass
 
-#действие
+
+# действие
 def get_friends(user_id):
     friends_get = '{}/friends.get'.format(API_URL)
     resp = requests.get(friends_get, params={
@@ -47,8 +52,9 @@ def get_friends(user_id):
     except (JSONDecodeError, KeyError):
         pass
 
-#вычисление
-def get_year(friend):
+
+# вычисление
+def get_birth_year(friend):
     bdate = friend.get('bdate')
     if not bdate:
         return None
@@ -58,34 +64,48 @@ def get_year(friend):
     year = int(bdate[2])
     return year
 
-#вычисление
-def update_value_by_key(dict, key):
+
+# вычисление
+def get_years(dict, key):
     new_dict = dict.copy()
     new_dict.setdefault(key, 0)
     new_dict[key] += 1
     return new_dict
 
+
+# вычисление
 def get_years_by_friends(friends, cur_year, years):
     for friend in friends:
-        year = get_year(friend)
-        if year is None:
+        birth_year = get_birth_year(friend)
+        if birth_year is None:
             continue
-        diff = cur_year - year
-        years = update_value_by_key(years, diff)
+        diff = cur_year - birth_year
+        years = get_years(years, diff)
     return years
 
-#действие
+
+#вычисление
+def get_sorted(years):
+    new_years = years.copy()
+    return sorted(new_years.items(), key=lambda v: (v[1], -v[0]), reverse=True)
+
+
+# действие
 def calc_age(uid):
-    user_id = get_user_id(uid)#действие
+    user_id = get_user_id(uid) # действие
     if user_id is None:
         return
 
-    friends = get_friends(user_id)#действие
+    friends = get_friends(user_id) # действие
     if friends is None:
         return
 
     years = {}
     cur_year = datetime.now().year
     years = get_years_by_friends(friends, cur_year, years)
+    return get_sorted(years)
 
-    return sorted(years.items(), key=lambda v: (v[1], -v[0]), reverse=True)
+
+if __name__ == '__main__':
+    res = calc_age('9910602')
+    print(res)
